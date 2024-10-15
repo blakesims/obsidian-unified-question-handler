@@ -39,3 +39,4 @@ dist/
 # Exclude temporary files
 *.tmp
 *.temp
+for-conversion/
