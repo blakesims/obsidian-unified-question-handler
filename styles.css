@@ -73,3 +73,8 @@
 .suggestion-item.is-selected {
   background-color: var(--background-secondary);
 }
+
+.suggestion-item mark {
+  background-color: var(--text-highlight-bg);
+  color: var(--text-normal);
+}

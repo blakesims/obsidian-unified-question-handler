@@ -2,6 +2,7 @@ import { App, ISuggestOwner, Scope } from 'obsidian';
 import { createPopper, Instance as PopperInstance } from '@popperjs/core';
 import { IndexIntegrator } from './indexIntegrator';
 import { NewEntryModal } from './newEntryModal';
+import * as Fuzzysort from 'fuzzysort';
 
 class Suggest<T> {
     private owner: ISuggestOwner<T>;
@@ -99,6 +100,11 @@ export class FuzzySuggester<T> implements ISuggestOwner<T> {
     private indexIntegrator: IndexIntegrator;
     public onSelect: (item: T) => void;
 
+    private fuzzySortOptions: Fuzzysort.Options = {
+        threshold: -10000,
+        limit: 50,
+    };
+
     constructor(
         app: App,
         inputEl: HTMLInputElement,
@@ -174,13 +180,27 @@ export class FuzzySuggester<T> implements ISuggestOwner<T> {
     }
 
     getSuggestions(inputStr: string): T[] {
-        return this.items.filter(item => 
-            this.getItemText(item).toLowerCase().contains(inputStr.toLowerCase())
-        );
+        const results = Fuzzysort.go(inputStr, this.items, {
+            ...this.fuzzySortOptions,
+            key: this.getItemText,
+        });
+        return results.map(result => result.obj as T);
     }
 
     renderSuggestion(item: T, el: HTMLElement): void {
-        el.setText(this.getItemText(item));
+        const itemText = this.getItemText(item);
+        const result = Fuzzysort.single(this.inputEl.value, itemText);
+        if (result) {
+            // The highlight method is on the result object, not on Fuzzysort
+            const highlighted = result.highlight('<mark>', '</mark>');
+            if (highlighted) {
+                el.innerHTML = highlighted;
+            } else {
+                el.textContent = itemText;
+            }
+        } else {
+            el.textContent = itemText;
+        }
     }
 
     async selectSuggestion(item: T): Promise<void> {
