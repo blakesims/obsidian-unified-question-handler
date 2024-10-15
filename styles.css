@@ -1,0 +1,47 @@
+.unified-question-modal {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.questions-container {
+  flex-grow: 1;
+  overflow-y: auto;
+  padding: 1rem;
+}
+
+.question-container {
+  margin-bottom: 1rem;
+}
+
+.selected-options {
+  margin-top: 0.5rem;
+}
+
+.selected-option {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: var(--background-secondary);
+  padding: 0.5rem;
+  margin-bottom: 0.5rem;
+  border-radius: 4px;
+}
+
+.remove-option {
+  cursor: pointer;
+  font-size: 1.2rem;
+  color: var(--text-muted);
+  padding: 0 0.5rem;
+}
+
+.add-another-button {
+  margin-top: 0.5rem;
+}
+
+.submit-button {
+  align-self: flex-end;
+  margin: 1rem;
+}
+
+/* Add more custom styles as needed */

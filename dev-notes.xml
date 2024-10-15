@@ -1,0 +1,696 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<obsidian-question-handler-project>
+  <metadata>
+    <title>Obsidian Question Handler Improvement Project</title>
+    <version>1.0</version>
+    <date>2024-10-14</date>
+    <author>Project Team</author>
+  </metadata>
+
+  <current-implementation>
+    <overview>
+      The current implementation uses a combination of Templater plugin functions and custom JavaScript to handle question prompts for creating and populating notes. It supports various question types and integrates with a custom index system.
+    </overview>
+    <components>
+      <component>
+        <name>IndexOperations</name>
+        <description>A custom class that handles reading from and writing to index files.</description>
+      </component>
+      <component>
+        <name>QuestionHandler</name>
+        <description>Manages the asking and processing of different question types.</description>
+      </component>
+      <component>
+        <name>NoteCreator</name>
+        <description>Handles the creation of new notes based on user inputs and templates.</description>
+      </component>
+    </components>
+    <workflows>
+      <workflow>
+        <name>Single Note Creation</name>
+        <description>User initiates note creation, answers a series of prompts, and a note is created with populated front matter.</description>
+      </workflow>
+      <workflow>
+        <name>Nested Selection</name>
+        <description>User navigates through hierarchical choices to select or create new index entries, resulting in note creation with nested references.</description>
+      </workflow>
+    </workflows>
+    <question-types>
+      <type>
+        <name>inputPrompt</name>
+        <description>Simple text input for user to enter information.</description>
+      </type>
+      <type>
+        <name>tpsuggester</name>
+        <description>Selection from a list of options, with the ability to add new entries.</description>
+      </type>
+      <type>
+        <name>nestedTpsuggester</name>
+        <description>Hierarchical selection from nested lists, allowing for creation of new entries at each level.</description>
+      </type>
+    </question-types>
+    <index-operations>
+      <operation>
+        <name>readIndexFile</name>
+        <description>Reads entries from a specified index file.</description>
+      </operation>
+      <operation>
+        <name>appendToIndexFile</name>
+        <description>Adds new entries to an index file.</description>
+      </operation>
+      <operation>
+        <name>selectFromIndexWithManualEntry</name>
+        <description>Allows selection from an index with the option to add new entries.</description>
+      </operation>
+    </index-operations>
+    <code-samples>
+      <sample>
+        <name>askQuestion Method</name>
+        <code>
+          async askQuestion(question: Question, existingAnswers: Record<string, Answer> = {}): Promise<Record<string, Answer> | null> {
+            switch (question.type.toLowerCase()) {
+              case "inputprompt": {
+                const inputAnswer = await this.handleInputPrompt(question);
+                return inputAnswer ? { [question.answerId]: inputAnswer } : null;
+              }
+              case "tpsuggester": {
+                const tpAnswer = await this.handleTpsuggester(question, existingAnswers);
+                return tpAnswer ? { [question.answerId]: tpAnswer } : null;
+              }
+              case "nestedtpsuggester":
+                return await this.handleNestedTpsuggester(question, existingAnswers);
+              default:
+                throw new Error(`Invalid question type: ${question.type}`);
+            }
+          }
+        </code>
+      </sample>
+    </code-samples>
+  </current-implementation>
+
+  <problem-statement>
+    <description>
+      The current implementation presents questions sequentially, one at a time. This approach is cumbersome for users, especially when dealing with multiple or nested questions. It lacks a unified interface that would allow users to see all questions at once and navigate between them efficiently.
+    </description>
+    <impact>
+      <point>Increased time to complete note creation process</point>
+      <point>Difficulty in reviewing and editing responses before submission</point>
+      <point>Potential for user errors due to lack of context</point>
+      <point>Reduced user satisfaction and productivity</point>
+    </impact>
+    <constraints>
+      <constraint>Must maintain compatibility with existing index operations and note creation workflows</constraint>
+      <constraint>Should not rely on external plugins other than core Obsidian API</constraint>
+      <constraint>Must work within Obsidian's plugin infrastructure</constraint>
+    </constraints>
+  </problem-statement>
+
+  <plugin-functionality>
+    <overview>
+      The plugin manages the creation of structured notes by prompting users for information, interacting with custom indices, and generating notes with appropriate front matter and content.
+    </overview>
+    <question-answer-system>
+      <feature>Supports multiple question types: input prompts, selections, and nested selections</feature>
+      <feature>Allows for dynamic addition of new entries to indices</feature>
+      <feature>Handles conditional questioning based on previous answers</feature>
+      <feature>Populates note front matter based on user responses</feature>
+    </question-answer-system>
+    <nested-indices>
+      <description>
+        The plugin uses a hierarchical index structure to organize information. It supports creating and navigating nested entries, allowing for complex relationships between different types of data (e.g., universities and courses).
+      </description>
+      <operations>
+        <operation>Reading from multi-level indices</operation>
+        <operation>Writing new entries to appropriate levels of the index</operation>
+        <operation>Maintaining parent-child relationships in the index structure</operation>
+      </operations>
+    </nested-indices>
+    <integration-points>
+      <point>Uses Obsidian's vault API for file operations</point>
+      <point>Interfaces with Obsidian's modal and notice systems for user interaction</point>
+      <point>Utilizes Obsidian's fuzzy search functionality for improved selection processes</point>
+    </integration-points>
+  </plugin-functionality>
+
+  <solution-requirements>
+    <functional-requirements>
+      <requirement>Present all questions for a note creation process in a single, unified interface</requirement>
+      <requirement>Support all existing question types: input prompts, selections, and nested selections</requirement>
+      <requirement>Allow navigation between questions using both mouse and keyboard</requirement>
+      <requirement>Incorporate Obsidian's fuzzy search for selection-based questions</requirement>
+      <requirement>Maintain ability to add new entries to indices during the question-answering process</requirement>
+      <requirement>Provide a review step before final submission of answers</requirement>
+      <requirement>Support conditional display of questions based on previous answers</requirement>
+    </functional-requirements>
+    <non-functional-requirements>
+      <requirement>Improve overall user experience and efficiency in note creation process</requirement>
+      <requirement>Ensure performance is on par or better than the current implementation</requirement>
+      <requirement>Maintain or improve current level of reliability and error handling</requirement>
+      <requirement>Provide clear visual feedback for user actions and system processes</requirement>
+    </non-functional-requirements>
+    <compatibility>
+      <requirement>Maintain compatibility with existing index structures and operations</requirement>
+      <requirement>Ensure new interface can be used as a drop-in replacement for current question-asking methods</requirement>
+      <requirement>Support existing note templates and front matter structures</requirement>
+    </compatibility>
+    <ui-ux-specifications>
+      <specification>Create a modal interface that displays all relevant questions at once</specification>
+      <specification>Implement tab navigation between question fields</specification>
+      <specification>Provide clear visual distinction between different question types</specification>
+      <specification>Include progress indicator for multi-step or nested questions</specification>
+      <specification>Offer collapsible sections for grouping related questions</specification>
+      <specification>Implement inline validation and error messaging</specification>
+    </ui-ux-specifications>
+  </solution-requirements>
+
+  <technical-specifications>
+    <architecture>
+      <component>
+        <name>Unified Question Modal</name>
+        <description>A new modal class that handles rendering and interaction for all question types in a single interface.</description>
+      </component>
+      <component>
+        <name>Question Renderer</name>
+        <description>Responsible for rendering different question types within the modal.</description>
+      </component>
+      <component>
+        <name>Answer Processor</name>
+        <description>Handles the collection and validation of user inputs.</description>
+      </component>
+      <component>
+        <name>Index Integrator</name>
+        <description>Manages interactions with the existing index system from within the new interface.</description>
+      </component>
+    </architecture>
+    <data-flow>
+      <step>Load question configuration from existing setup</step>
+      <step>Render all questions in the unified modal interface</step>
+      <step>Collect and validate user inputs as they interact with the interface</step>
+      <step>Process index operations (reads/writes) in real-time as users make selections or add new entries</step>
+      <step>Compile all answers and trigger note creation process</step>
+    </data-flow>
+    <api-integration>
+      <point>Utilize Obsidian's Modal API for creating the main interface</point>
+      <point>Use Obsidian's vault API for file operations related to indices and note creation</point>
+      <point>Integrate with Obsidian's fuzzy search API for enhanced selection interfaces</point>
+    </api-integration>
+    <fuzzy-search>
+      <description>
+        Implement fuzzy search functionality for all selection-based questions, utilizing Obsidian's built-in fuzzy search capabilities. This should be seamlessly integrated into the dropdown or list selection interfaces.
+      </description>
+    </fuzzy-search>
+    <performance-considerations>
+      <consideration>Optimize rendering of large numbers of questions to maintain responsiveness</consideration>
+      <consideration>Implement efficient data binding to handle real-time updates of nested or dependent questions</consideration>
+      <consideration>Consider lazy loading for nested question options to improve initial load times</consideration>
+    </performance-considerations>
+  </technical-specifications>
+
+  <implementation-guidelines>
+    <coding-standards>
+      <standard>Follow TypeScript best practices and Obsidian plugin development guidelines</standard>
+      <standard>Use clear, descriptive variable and function names</standard>
+      <standard>Implement comprehensive error handling and logging</standard>
+      <standard>Write modular, reusable code components</standard>
+    </coding-standards>
+    <testing-strategy>
+      <approach>Develop unit tests for all new components and functions</approach>
+      <approach>Implement integration tests to ensure compatibility with existing systems</approach>
+      <approach>Conduct thorough user acceptance testing with various question configurations</approach>
+    </testing-strategy>
+    <documentation-requirements>
+      <requirement>Provide inline code documentation for all new functions and classes</requirement>
+      <requirement>Update user-facing documentation to reflect the new interface and capabilities</requirement>
+      <requirement>Create developer documentation for future maintenance and extensions</requirement>
+    </documentation-requirements>
+  </implementation-guidelines>
+
+  <migration-plan>
+    <steps>
+      <step>Develop the new unified question interface alongside the existing implementation</step>
+      <step>Create a configuration option to switch between old and new interfaces</step>
+      <step>Implement a compatibility layer to ensure existing scripts can use the new interface transparently</step>
+      <step>Conduct thorough testing with various note types and question configurations</step>
+      <step>Gradually roll out the new interface to users, collecting feedback and addressing issues</step>
+      <step>Once stability is confirmed, set the new interface as the default</step>
+    </steps>
+    <backwards-compatibility>
+      <strategy>Maintain support for existing question type definitions and configurations</strategy>
+      <strategy>Implement adapter functions to translate between old and new data structures if necessary</strategy>
+      <strategy>Provide detailed migration guides for users with custom scripts or templates</strategy>
+    </backwards-compatibility>
+    <rollback-procedure>
+      <step>Maintain the option to switch back to the old interface in plugin settings</step>
+      <step>Create snapshot of index and configuration states before major changes</step>
+      <step>Implement logging system to track any data modifications during migration</step>
+    </rollback-procedure>
+  </migration-plan>
+
+  <implementation-progress>
+    <completed-tasks>
+      <task>
+        <description>Set up basic plugin structure</description>
+        <details>Created main.ts, manifest.json, and necessary TypeScript files</details>
+      </task>
+      <task>
+        <description>Implemented basic Question and Answer types</description>
+        <details>Defined QuestionType, Question interface, and Answer type in types.ts</details>
+      </task>
+      <task>
+        <description>Created UnifiedQuestionModal class</description>
+        <details>Implemented modal to display all questions at once</details>
+      </task>
+      <task>
+        <description>Developed QuestionRenderer class</description>
+        <details>Created basic rendering logic for different question types</details>
+      </task>
+      <task>
+        <description>Set up build configuration</description>
+        <details>Added esbuild.config.mjs and updated package.json for proper building</details>
+      </task>
+      <task>
+        <description>Integrated Unified Question Handler with existing scripts</description>
+        <details>
+          <item>Modified the tutorial script to use the Unified Question Handler API for main questions</item>
+          <item>Kept existing functionality for tutor rate questions and other specialized operations</item>
+          <item>Updated the IndexIntegrator to handle new entries more efficiently</item>
+        </details>
+      </task>
+      <task>
+        <description>Enhanced the UnifiedQuestionHandlerAPI</description>
+        <details>
+          <item>Added methods for reading and appending to index files</item>
+          <item>Implemented askDynamicQuestions for handling follow-up questions</item>
+        </details>
+      </task>
+      <task>
+        <description>Improved QuestionRenderer functionality</description>
+        <details>
+          <item>Added support for indexedManual question type</item>
+          <item>Enhanced error handling and logging</item>
+        </details>
+      </task>
+      <task>
+        <description>Created test scripts and commands</description>
+        <details>
+          <item>Implemented a test script for the Unified Question Handler</item>
+          <item>Added test commands to the plugin for easier debugging</item>
+        </details>
+      </task>
+      <task>
+        <description>Implemented multi-select question type</description>
+        <details>
+          <item>Added support for multi-select questions in QuestionRenderer</item>
+          <item>Updated UnifiedQuestionModal to handle multi-select answers</item>
+          <item>Integrated multi-select functionality with existing question types</item>
+        </details>
+      </task>
+      <task>
+        <description>Improved checkbox rendering and functionality</description>
+        <details>
+          <item>Enhanced checkbox rendering to properly handle default values</item>
+          <item>Ensured checkbox state is correctly initialized and updated</item>
+        </details>
+      </task>
+      <task>
+        <description>Refined IndexedManual question type</description>
+        <details>
+          <item>Implemented IndexedManual rendering in QuestionRenderer</item>
+          <item>Integrated IndexedManual with FuzzySuggesterModal for option selection</item>
+        </details>
+      </task>
+    </completed-tasks>
+    
+    <current-state>
+      <description>
+        The Unified Question Handler now supports a wider range of question types, including multi-select and improved checkbox functionality. The core API is working as expected, allowing for seamless integration with existing scripts. However, some UI refinements are needed to improve the user experience.
+      </description>
+    </current-state>
+    
+    <decisions-made>
+      <decision>
+        <description>Use a single modal for all questions instead of sequential prompts</description>
+        <rationale>Improves user experience by providing an overview of all questions at once</rationale>
+      </decision>
+      <decision>
+        <description>Implement QuestionRenderer as a separate class</description>
+        <rationale>Allows for easier extension and maintenance of rendering logic for different question types</rationale>
+      </decision>
+      <decision>
+        <description>Use esbuild for bundling the plugin</description>
+        <rationale>Provides fast and efficient bundling, suitable for Obsidian plugin development</rationale>
+      </decision>
+      <decision>
+        <description>Create a custom NewEntryModal for adding new entries</description>
+        <rationale>To replace unsupported window.prompt() and maintain consistency with Obsidian's UI</rationale>
+      </decision>
+      <decision>
+        <description>Simplify the scope to focus on replacing questioning and answer handling in existing scripts</description>
+        <rationale>To create a more focused and easily integrable solution</rationale>
+      </decision>
+      <decision>
+        <description>Implement a flexible question configuration structure</description>
+        <rationale>To support various question types and allow easy integration with existing scripts</rationale>
+      </decision>
+      <decision>
+        <description>Revert complex changes that introduced bugs</description>
+        <rationale>To maintain a stable, working version of the plugin</rationale>
+      </decision>
+      <decision>
+        <description>Postpone implementation of nested indexes</description>
+        <rationale>To focus on core functionality and simplify the current implementation</rationale>
+      </decision>
+      <decision>
+        <description>Defer multiple options functionality</description>
+        <rationale>To be considered for future development after core features are stable</rationale>
+      </decision>
+    </decisions-made>
+
+    <lessons-learned>
+      <lesson>
+        <description>Attempted to implement complex features too quickly</description>
+        <outcome>Introduced bugs and instability in the plugin</outcome>
+        <action>Will focus on incremental improvements and thorough testing moving forward</action>
+      </lesson>
+      <lesson>
+        <description>Tried to handle multiple question types simultaneously</description>
+        <outcome>Increased complexity led to difficulties in debugging and maintaining code</outcome>
+        <action>Will prioritize one question type at a time in future development</action>
+      </lesson>
+    </lessons-learned>
+  </implementation-progress>
+
+  <next-steps>
+    <step>
+      <description>Conduct thorough testing with various script scenarios</description>
+      <priority>High</priority>
+      <details>
+        <item>Test the plugin with different combinations of question types</item>
+        <item>Verify proper handling of index file operations</item>
+        <item>Ensure compatibility with existing Templater and QuickAdd workflows</item>
+      </details>
+    </step>
+    <step>
+      <description>Refine error handling and user feedback</description>
+      <priority>Medium</priority>
+      <details>
+        <item>Implement more robust error catching in the API and modal</item>
+        <item>Improve user notifications for various scenarios (e.g., index file not found, new entry added)</item>
+      </details>
+    </step>
+    <step>
+      <description>Optimize performance for large index files</description>
+      <priority>Low</priority>
+      <details>
+        <item>Investigate potential performance improvements for reading and writing to large index files</item>
+        <item>Consider implementing caching mechanisms if necessary</item>
+      </details>
+    </step>
+    <step>
+      <description>Create comprehensive documentation</description>
+      <priority>Medium</priority>
+      <details>
+        <item>Write user guide for integrating the Unified Question Handler into existing scripts</item>
+        <item>Document API methods and their usage</item>
+        <item>Provide examples for common use cases</item>
+      </details>
+    </step>
+    <step>
+      <description>Integrate current functionality into existing workflows</description>
+      <priority>Highest</priority>
+      <details>
+        <item>Identify key points of integration in current scripts and templates</item>
+        <item>Develop adapter functions to bridge between existing code and new plugin functionality</item>
+        <item>Create documentation for users on how to migrate their current workflows to use the new plugin</item>
+        <item>Implement example scripts showcasing the integration of the plugin with common workflows</item>
+      </details>
+    </step>
+    <step>
+      <description>Enhance error handling and user feedback</description>
+      <priority>High</priority>
+      <details>
+        <item>Implement more robust error catching and reporting</item>
+        <item>Add user-friendly notifications for common issues and resolutions</item>
+        <item>Create a logging system for easier debugging and support</item>
+      </details>
+    </step>
+    <step>
+      <description>Improve plugin configuration options</description>
+      <priority>Medium</priority>
+      <details>
+        <item>Develop a settings tab for the plugin</item>
+        <item>Allow users to define default behaviors and paths</item>
+        <item>Implement options for customizing the appearance of the question modal</item>
+      </details>
+    </step>
+    <step>
+      <description>Conduct thorough testing and gather user feedback</description>
+      <priority>High</priority>
+      <details>
+        <item>Develop a comprehensive test suite for all current functionality</item>
+        <item>Engage with a group of beta testers to gather real-world usage data</item>
+        <item>Analyze feedback and prioritize further improvements based on user needs</item>
+      </details>
+    </step>
+    <step>
+      <description>Refine Question Configuration Structure</description>
+      <priority>High</priority>
+      <details>
+        <item>Update the Question interface in types.ts to include all necessary fields</item>
+        <item>Add support for new question types: indexed, indexedManual, indexedMultiple, indexedMultipleManual, checkbox, fileList</item>
+        <item>Implement validation rules for each question type</item>
+      </details>
+    </step>
+    <step>
+      <description>Enhance IndexIntegrator Functionality</description>
+      <priority>High</priority>
+      <details>
+        <item>Implement full CRUD operations for index files</item>
+        <item>Add support for reading directory contents for fileList type questions</item>
+        <item>Improve error handling and logging</item>
+      </details>
+    </step>
+    <step>
+      <description>Expand QuestionRenderer Capabilities</description>
+      <priority>High</priority>
+      <details>
+        <item>Implement rendering logic for all new question types</item>
+        <item>Enhance FuzzySuggesterModal to support multiple selection</item>
+        <item>Add support for file selection from directories</item>
+      </details>
+    </step>
+    <step>
+      <description>Develop UnifiedQuestionHandler API</description>
+      <priority>High</priority>
+      <details>
+        <item>Create a simple API for scripts to interact with the plugin</item>
+        <item>Implement methods for running question sets and retrieving answers</item>
+        <item>Add support for dynamic question generation based on previous answers</item>
+      </details>
+    </step>
+    <step>
+      <description>Implement Answer Processing and Validation</description>
+      <priority>Medium</priority>
+      <details>
+        <item>Enhance AnswerProcessor to handle all question types</item>
+        <item>Implement validation rules for each question type</item>
+        <item>Add support for custom validation functions</item>
+      </details>
+    </step>
+    <step>
+      <description>Create Plugin Settings</description>
+      <priority>Medium</priority>
+      <details>
+        <item>Implement a settings tab for the plugin</item>
+        <item>Add options for configuring default behaviors</item>
+        <item>Create an interface for managing question sets</item>
+      </details>
+    </step>
+    <step>
+      <description>Develop Integration Examples</description>
+      <priority>Medium</priority>
+      <details>
+        <item>Create example scripts demonstrating plugin usage</item>
+        <item>Provide templates for common use cases (e.g., student information gathering)</item>
+        <item>Document best practices for integrating with existing workflows</item>
+      </details>
+    </step>
+    <step>
+      <description>Implement Error Handling and Logging</description>
+      <priority>Low</priority>
+      <details>
+        <item>Add comprehensive error handling throughout the plugin</item>
+        <item>Implement a logging system for debugging and troubleshooting</item>
+        <item>Create user-friendly error messages and notifications</item>
+      </details>
+    </step>
+    <step>
+      <description>Write Documentation</description>
+      <priority>Medium</priority>
+      <details>
+        <item>Create user documentation explaining plugin usage and configuration</item>
+        <item>Write developer documentation for future maintenance and extensions</item>
+        <item>Provide examples and tutorials for common use cases</item>
+      </details>
+    </step>
+    <step>
+      <description>Conduct Testing and Refinement</description>
+      <priority>High</priority>
+      <details>
+        <item>Develop unit tests for all components</item>
+        <item>Conduct integration testing with existing Obsidian plugins and scripts</item>
+        <item>Perform user acceptance testing and gather feedback</item>
+        <item>Refine and optimize based on testing results</item>
+      </details>
+    </step>
+    <step>
+      <description>Refine UI layout and styling</description>
+      <priority>High</priority>
+      <details>
+        <item>Adjust spacing between question elements for better readability</item>
+        <item>Reposition the submit button to the bottom of the modal</item>
+        <item>Replace remove buttons with cross icons and position them to the right</item>
+        <item>Ensure consistent styling across all question types</item>
+      </details>
+    </step>
+  </next-steps>
+
+  <open-questions>
+    <question>
+      <description>How can we best handle dynamic question generation based on previous answers?</description>
+    </question>
+    <question>
+      <description>What's the most efficient way to integrate with existing Templater and QuickAdd workflows?</description>
+    </question>
+    <question>
+      <description>How should we approach versioning and backwards compatibility as we develop new features?</description>
+    </question>
+  </open-questions>
+
+  <appendices>
+    <glossary>
+      <term>
+        <name>Front Matter</name>
+        <definition>Metadata at the beginning of a note, typically in YAML format.</definition>
+      </term>
+      <term>
+        <name>Index</name>
+        <definition>A structured collection of entries used for organizing and quickly accessing information.</definition>
+      </term>
+      <term>
+        <name>Fuzzy Search</name>
+        <definition>A technique that locates strings that match a pattern approximately (rather than exactly).</definition>
+      </term>
+    </glossary>
+    <references>
+      <reference>
+        <name>Obsidian API Documentation</name>
+        <url>https://github.com/obsidianmd/obsidian-api</url>
+      </reference>
+      <reference>
+        <name>Obsidian Plugin Development</name>
+        <url>https://marcus.se.net/obsidian-plugin-docs/</url>
+      </reference>
+    </references>
+    <change-log>
+      <entry>
+        <date>2024-10-14</date>
+        <description>Initial creation of the project specification document.</description>
+      </entry>
+    </change-log>
+  </appendices>
+
+  <future-considerations>
+    <item>
+      <description>Implement nested indexes functionality</description>
+      <notes>To be considered after core features are stable and well-integrated</notes>
+    </item>
+    <item>
+      <description>Develop multiple options selection for questions</description>
+      <notes>Planned for future releases, pending user demand and compatibility with existing workflows</notes>
+    </item>
+  </future-considerations>
+
+  <future-plans>
+    <plan>
+      <name>Implement Multi-Option Choice Feature</name>
+      <description>
+        Develop a multi-select question type that allows users to choose multiple options from an index or predefined list.
+      </description>
+      <steps>
+        <step>
+          <name>Update Question Type</name>
+          <details>
+            <item>Add a new 'multiSelect' question type to the QuestionType in src/types.ts</item>
+            <item>Create a new interface MultiSelectQuestion that extends BaseQuestion</item>
+            <item>Add properties for minimum and maximum number of selections</item>
+          </details>
+        </step>
+        <step>
+          <name>Modify UnifiedQuestionModal</name>
+          <details>
+            <item>Update the onOpen method to handle 'multiSelect' questions</item>
+            <item>Create a new renderMultiSelectQuestion method to display selected options and the "Add Another" button</item>
+          </details>
+        </step>
+        <step>
+          <name>Enhance QuestionRenderer</name>
+          <details>
+            <item>Add a new renderMultiSelect method to handle the 'multiSelect' question type</item>
+            <item>Implement UI for displaying selected options and an "Add Another" button</item>
+            <item>Create a method to open a MultiSelectModal for selecting additional options</item>
+          </details>
+        </step>
+        <step>
+          <name>Create MultiSelectModal</name>
+          <details>
+            <item>Develop a new modal class that extends FuzzySuggestModal for selecting multiple options</item>
+            <item>Implement functionality to add new entries to the index if needed</item>
+            <item>Allow users to select multiple items before closing the modal</item>
+          </details>
+        </step>
+        <step>
+          <name>Update IndexIntegrator</name>
+          <details>
+            <item>Modify the selectFromIndexWithManualEntry method to support multiple selections if necessary</item>
+            <item>Ensure proper handling of new entries for multi-select questions</item>
+          </details>
+        </step>
+        <step>
+          <name>Modify UnifiedQuestionHandlerAPI</name>
+          <details>
+            <item>Update the askQuestions method to handle multi-select questions</item>
+            <item>Ensure proper type handling for multi-select answers</item>
+          </details>
+        </step>
+        <step>
+          <name>Create Test Case</name>
+          <details>
+            <item>Develop a new test case in examples/test-unified-question-handler.js for multi-select courses</item>
+            <item>Test various scenarios including minimum and maximum selection limits</item>
+          </details>
+        </step>
+        <step>
+          <name>Update Documentation</name>
+          <details>
+            <item>Add information about the new multi-select feature to the plugin documentation</item>
+            <item>Provide examples of how to use and configure multi-select questions</item>
+          </details>
+        </step>
+        <step>
+          <name>Refine and Optimize</name>
+          <details>
+            <item>Conduct thorough testing and gather user feedback</item>
+            <item>Optimize performance for large indices</item>
+            <item>Improve UI/UX based on user input</item>
+          </details>
+        </step>
+      </steps>
+      <considerations>
+        <item>Ensure backwards compatibility with existing question types</item>
+        <item>Consider how multi-select questions will integrate with existing workflows</item>
+        <item>Plan for potential expansion of the feature (e.g., nested multi-select options)</item>
+      </considerations>
+    </plan>
+  </future-plans>
+</obsidian-question-handler-project>
