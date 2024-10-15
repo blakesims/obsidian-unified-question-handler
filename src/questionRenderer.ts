@@ -28,7 +28,7 @@ export class QuestionRenderer {
         this.renderCheckbox(container, question as CheckboxQuestion, existingAnswer as boolean | undefined, onAnswerChange);
         break;
       case 'multiSelect':
-        await this.renderMultiSelect(container, question as MultiSelectQuestion, existingAnswer as string[] | undefined, onAnswerChange);
+        await this.renderMultiSelect(container, question as MultiSelectQuestion, existingAnswers: string[] = [], onAnswerChange);
         break;
       case 'fuzzySuggester':
         await this.renderFuzzySuggester(container, question as FuzzySuggesterQuestion, existingAnswer as string | undefined, onAnswerChange);
@@ -218,7 +218,7 @@ export class QuestionRenderer {
     console.log(`Rendering fuzzySuggester for question: ${question.answerId}`);
     const input = container.createEl('input', {
       type: 'text',
-      value: existingAnswer || question.defaultValue as string || '',
+      value: existingAnswer || question.defaultValue || '',
       placeholder: 'Start typing to search...'
     });
     input.id = question.answerId;
@@ -230,21 +230,30 @@ export class QuestionRenderer {
       options = [...question.options];
     }
 
-    new FuzzySuggester(
+    const fuzzySuggester = new FuzzySuggester(
       this.app,
       input,
       options,
-      (item: string) => item
+      (item: string) => item,
+      question.allowNewEntry,
+      question.indexPath
     );
+
+    fuzzySuggester.onSelect = (selectedItem: string) => {
+      onAnswerChange?.(question.answerId, selectedItem);
+    };
 
     input.addEventListener('input', (e) => {
       const value = (e.target as HTMLInputElement).value;
       onAnswerChange?.(question.answerId, value);
     });
 
-    if (existingAnswer) {
-      console.log(`Setting initial value for ${question.answerId}: ${existingAnswer}`);
-      onAnswerChange?.(question.answerId, existingAnswer);
+    if (existingAnswer || question.defaultValue) {
+      const initialValue = existingAnswer || question.defaultValue;
+      console.log(`Setting initial value for ${question.answerId}: ${initialValue}`);
+      onAnswerChange?.(question.answerId, initialValue as string);
+      input.value = initialValue as string;
+      fuzzySuggester.onInputChanged();
     }
   }
 }

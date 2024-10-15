@@ -23,6 +23,7 @@ export interface FuzzySuggesterQuestion extends BaseQuestion {
   options?: string[];
   indexPath?: string;
   allowNewEntry?: boolean;
+  defaultValue?: string;
 }
 
 export interface IndexedManualQuestion extends BaseQuestion {

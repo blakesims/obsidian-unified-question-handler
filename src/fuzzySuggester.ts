@@ -1,5 +1,7 @@
 import { App, ISuggestOwner, Scope } from 'obsidian';
 import { createPopper, Instance as PopperInstance } from '@popperjs/core';
+import { IndexIntegrator } from './indexIntegrator';
+import { NewEntryModal } from './newEntryModal';
 
 class Suggest<T> {
     private owner: ISuggestOwner<T>;
@@ -94,11 +96,21 @@ export class FuzzySuggester<T> implements ISuggestOwner<T> {
     private suggest: Suggest<T>;
     private popper: PopperInstance;
     private app: App;
+    private indexIntegrator: IndexIntegrator;
+    public onSelect: (item: T) => void;
 
-    constructor(app: App, inputEl: HTMLInputElement, private items: T[], private getItemText: (item: T) => string) {
+    constructor(
+        app: App,
+        inputEl: HTMLInputElement,
+        private items: T[],
+        private getItemText: (item: T) => string,
+        private allowNewEntry: boolean = false,
+        private indexPath?: string
+    ) {
         this.app = app;
         this.inputEl = inputEl;
         this.scope = new Scope();
+        this.indexIntegrator = new IndexIntegrator(app);
 
         this.suggestEl = createDiv("suggestion-container");
         const suggestion = this.suggestEl.createDiv("suggestion");
@@ -118,7 +130,10 @@ export class FuzzySuggester<T> implements ISuggestOwner<T> {
         const inputStr = this.inputEl.value;
         const suggestions = this.getSuggestions(inputStr);
 
-        if (suggestions.length > 0) {
+        if (suggestions.length > 0 || (this.allowNewEntry && inputStr)) {
+            if (this.allowNewEntry) {
+                suggestions.push("New Entry" as unknown as T);
+            }
             this.suggest.setSuggestions(suggestions);
             this.open(this.app.dom.appContainerEl, this.inputEl);
         } else {
@@ -168,8 +183,22 @@ export class FuzzySuggester<T> implements ISuggestOwner<T> {
         el.setText(this.getItemText(item));
     }
 
-    selectSuggestion(item: T): void {
-        this.inputEl.value = this.getItemText(item);
+    async selectSuggestion(item: T): Promise<void> {
+        if (item === "New Entry") {
+            const newEntryModal = new NewEntryModal(this.app, "Enter new entry");
+            const newEntry = await newEntryModal.openAndGetValue();
+            if (newEntry) {
+                if (this.indexPath) {
+                    await this.indexIntegrator.appendToIndexFile(this.indexPath, newEntry);
+                }
+                this.items.push(newEntry as unknown as T);
+                this.inputEl.value = newEntry;
+                this.onSelect?.(newEntry as unknown as T);
+            }
+        } else {
+            this.inputEl.value = this.getItemText(item);
+            this.onSelect?.(item);
+        }
         this.inputEl.trigger("input");
         this.close();
     }
