@@ -22,6 +22,7 @@ export interface IndexedManualQuestion extends BaseQuestion {
   type: "indexedManual";
   indexPath: string;
   allowNewEntry?: boolean;
+  defaultValue?: string;
 }
 
 export interface CheckboxQuestion extends BaseQuestion {

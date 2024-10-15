@@ -7,6 +7,8 @@ export class UnifiedQuestionModal extends Modal {
   private answers: Record<string, Answer> = {};
   private questionRenderer: QuestionRenderer;
   private indexIntegrator: IndexIntegrator;
+  private resolvePromise: (value: Record<string, Answer> | null) => void;
+  private isSubmitted: boolean = false;
 
   constructor(app: App, private questions: Question[]) {
     super(app);
@@ -45,6 +47,9 @@ export class UnifiedQuestionModal extends Modal {
   onClose() {
     const { contentEl } = this;
     contentEl.empty();
+    if (!this.isSubmitted) {
+      this.resolvePromise(null);
+    }
   }
 
   private handleAnswerChange(answerId: string, value: Answer) {
@@ -53,15 +58,15 @@ export class UnifiedQuestionModal extends Modal {
 
   private async handleSubmit() {
     await this.indexIntegrator.updateIndices(this.answers, this.questions);
+    this.isSubmitted = true;
     this.close();
+    this.resolvePromise(this.answers);
   }
 
   open(): Promise<Record<string, Answer> | null> {
     return new Promise((resolve) => {
+      this.resolvePromise = resolve;
       super.open();
-      this.onClose = () => {
-        resolve(Object.keys(this.answers).length > 0 ? this.answers : null);
-      };
     });
   }
 }

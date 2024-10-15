@@ -111,7 +111,17 @@ export class QuestionRenderer {
 
   private async renderIndexedManual(container: HTMLElement, question: IndexedManualQuestion, existingAnswer?: string, onAnswerChange?: (answerId: string, value: string) => void) {
     console.log(`Rendering indexedManual for question: ${question.answerId}`);
-    const button = container.createEl('button', { text: existingAnswer || question.defaultValue as string || 'Select' });
+    let defaultValue = existingAnswer || '';
+
+    if (question.defaultValue && question.indexPath) {
+      const indexEntries = await this.indexIntegrator.readIndexFile(question.indexPath);
+      const foundEntry = indexEntries.find(entry => entry.toLowerCase() === question.defaultValue.toLowerCase());
+      if (foundEntry) {
+        defaultValue = foundEntry;
+      }
+    }
+
+    const button = container.createEl('button', { text: defaultValue || 'Select' });
     button.id = question.answerId;
 
     button.addEventListener('click', async () => {
@@ -144,9 +154,9 @@ export class QuestionRenderer {
       }
     });
 
-    if (existingAnswer) {
-      console.log(`Setting initial value for ${question.answerId}: ${existingAnswer}`);
-      onAnswerChange?.(question.answerId, existingAnswer);
+    if (defaultValue) {
+      console.log(`Setting initial value for ${question.answerId}: ${defaultValue}`);
+      onAnswerChange?.(question.answerId, defaultValue);
     }
   }
 
