@@ -59,6 +59,8 @@ export class IndexIntegrator {
     for (const question of questions) {
       if ((question.type === 'tpsuggester' || question.type === 'indexedManual' || question.type === 'multiSelect' || question.type === 'fuzzySuggester') && 'indexPath' in question && question.indexPath) {
         const answer = answers[question.answerId];
+        console.log(`Processing answer for ${question.answerId}:`, answer);
+        console.log(`Current newlyAddedEntries:`, this.newlyAddedEntries);
         if (Array.isArray(answer)) {
           for (const item of answer) {
             if (typeof item === 'string' && item.trim() !== '' && this.newlyAddedEntries.has(item.trim())) {
