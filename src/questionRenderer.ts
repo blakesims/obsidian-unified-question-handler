@@ -1,7 +1,8 @@
-import { Question, Answer, TpSuggesterQuestion, IndexedManualQuestion, CheckboxQuestion, MultiSelectQuestion } from './types';
+import { Question, Answer, TpSuggesterQuestion, IndexedManualQuestion, CheckboxQuestion, MultiSelectQuestion, FuzzySuggesterQuestion } from './types';
 import { IndexIntegrator } from './indexIntegrator';
 import { App, FuzzySuggestModal } from 'obsidian';
 import { NewEntryModal } from './newEntryModal';
+import { FuzzySuggester } from './fuzzySuggester';
 
 export class QuestionRenderer {
   constructor(private indexIntegrator: IndexIntegrator, private app: App) {}
@@ -28,6 +29,9 @@ export class QuestionRenderer {
         break;
       case 'multiSelect':
         await this.renderMultiSelect(container, question as MultiSelectQuestion, existingAnswer as string[] | undefined, onAnswerChange);
+        break;
+      case 'fuzzySuggester':
+        await this.renderFuzzySuggester(container, question as FuzzySuggesterQuestion, existingAnswer as string | undefined, onAnswerChange);
         break;
       default:
         console.error(`Unsupported question type: ${(question as Question).type}`);
@@ -208,6 +212,40 @@ export class QuestionRenderer {
     });
 
     updateSelectedOptions();
+  }
+
+  private async renderFuzzySuggester(container: HTMLElement, question: FuzzySuggesterQuestion, existingAnswer?: string, onAnswerChange?: (answerId: string, value: string) => void) {
+    console.log(`Rendering fuzzySuggester for question: ${question.answerId}`);
+    const input = container.createEl('input', {
+      type: 'text',
+      value: existingAnswer || question.defaultValue as string || '',
+      placeholder: 'Start typing to search...'
+    });
+    input.id = question.answerId;
+
+    let options: string[] = [];
+    if (question.indexPath) {
+      options = await this.indexIntegrator.readIndexFile(question.indexPath);
+    } else if (question.options) {
+      options = [...question.options];
+    }
+
+    new FuzzySuggester(
+      this.app,
+      input,
+      options,
+      (item: string) => item
+    );
+
+    input.addEventListener('input', (e) => {
+      const value = (e.target as HTMLInputElement).value;
+      onAnswerChange?.(question.answerId, value);
+    });
+
+    if (existingAnswer) {
+      console.log(`Setting initial value for ${question.answerId}: ${existingAnswer}`);
+      onAnswerChange?.(question.answerId, existingAnswer);
+    }
   }
 }
 

@@ -1,4 +1,4 @@
-export type QuestionType = "inputPrompt" | "tpsuggester" | "indexedManual" | "checkbox" | "multiSelect";
+export type QuestionType = "inputPrompt" | "tpsuggester" | "fuzzySuggester" | "indexedManual" | "checkbox" | "multiSelect";
 
 export interface BaseQuestion {
   type: QuestionType;
@@ -13,6 +13,13 @@ export interface InputPromptQuestion extends BaseQuestion {
 
 export interface TpSuggesterQuestion extends BaseQuestion {
   type: "tpsuggester";
+  options?: string[];
+  indexPath?: string;
+  allowNewEntry?: boolean;
+}
+
+export interface FuzzySuggesterQuestion extends BaseQuestion {
+  type: "fuzzySuggester";
   options?: string[];
   indexPath?: string;
   allowNewEntry?: boolean;
@@ -42,6 +49,7 @@ export interface MultiSelectQuestion extends BaseQuestion {
 export type Question =
   | InputPromptQuestion
   | TpSuggesterQuestion
+  | FuzzySuggesterQuestion
   | IndexedManualQuestion
   | CheckboxQuestion
   | MultiSelectQuestion;
