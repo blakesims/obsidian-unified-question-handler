@@ -555,6 +555,13 @@
       <description>Implement custom styling options for the fuzzy search dropdown</description>
       <notes>Allow users to customize the appearance of the dropdown to match their Obsidian theme</notes>
     </item>
+    <item>
+      <description>Implement conditional rendering of questions</description>
+      <notes>
+        Allow certain questions to be displayed or hidden based on answers to previous questions.
+        This would enable more dynamic and context-sensitive questionnaires.
+      </notes>
+    </item>
   </future-considerations>
 
   <future-plans>
