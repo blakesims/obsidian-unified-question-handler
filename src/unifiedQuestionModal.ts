@@ -53,13 +53,9 @@ export class UnifiedQuestionModal extends Modal {
   }
 
   private focusOnFirstInput(element: HTMLElement) {
-    const firstInput = element.querySelector('input, textarea, select, .checkbox-wrapper') as HTMLElement;
+    const firstInput = element.querySelector('input, textarea, select') as HTMLElement;
     if (firstInput) {
-      if (firstInput.classList.contains('checkbox-wrapper')) {
-        (firstInput.querySelector('input[type="checkbox"]') as HTMLInputElement)?.focus();
-      } else {
-        firstInput.focus();
-      }
+      setTimeout(() => firstInput.focus(), 0);
     }
   }
 

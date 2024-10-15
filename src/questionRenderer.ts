@@ -107,25 +107,25 @@ export class QuestionRenderer {
     label.htmlFor = question.answerId;
     label.textContent = question.prompt;
 
-    // Make the wrapper focusable
-    wrapper.setAttribute('tabindex', '0');
+    // Make the checkbox focusable
+    checkbox.setAttribute('tabindex', '0');
 
     // Toggle checkbox on Enter key or Space
-    wrapper.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' || e.key === ' ') {
-        e.preventDefault();
-        checkbox.checked = !checkbox.checked;
-        onAnswerChange?.(question.answerId, checkbox.checked);
-      }
+    checkbox.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            checkbox.checked = !checkbox.checked;
+            onAnswerChange?.(question.answerId, checkbox.checked);
+        }
     });
 
     checkbox.addEventListener('change', (e) => {
-      onAnswerChange?.(question.answerId, (e.target as HTMLInputElement).checked);
+        onAnswerChange?.(question.answerId, (e.target as HTMLInputElement).checked);
     });
 
     // If there's an existing answer or default value, trigger the onAnswerChange
     if (existingAnswer !== undefined || question.defaultValue !== undefined) {
-      onAnswerChange?.(question.answerId, checkbox.checked);
+        onAnswerChange?.(question.answerId, checkbox.checked);
     }
 
     return wrapper;

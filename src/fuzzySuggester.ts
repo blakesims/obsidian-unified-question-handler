@@ -99,6 +99,7 @@ export class FuzzySuggester<T> implements ISuggestOwner<T> {
     private app: App;
     private indexIntegrator: IndexIntegrator;
     public onSelect: (item: T) => void;
+    private currentInput: string = '';
 
     private fuzzySortOptions: Fuzzysort.Options = {
         threshold: -10000,
@@ -136,10 +137,7 @@ export class FuzzySuggester<T> implements ISuggestOwner<T> {
         const inputStr = this.inputEl.value;
         const suggestions = this.getSuggestions(inputStr);
 
-        if (suggestions.length > 0 || (this.allowNewEntry && inputStr)) {
-            if (this.allowNewEntry) {
-                suggestions.push("New Entry" as unknown as T);
-            }
+        if (suggestions.length > 0) {
             this.suggest.setSuggestions(suggestions);
             this.open(document.body, this.inputEl);
         } else {
@@ -180,11 +178,19 @@ export class FuzzySuggester<T> implements ISuggestOwner<T> {
     }
 
     getSuggestions(inputStr: string): T[] {
+        this.currentInput = inputStr; // Store the current input
         const results = Fuzzysort.go(inputStr, this.items, {
             ...this.fuzzySortOptions,
             key: this.getItemText,
         });
-        return results.map(result => result.obj as T);
+        const suggestions = results.map(result => result.obj as T);
+        
+        // Add "New Entry" only if there are no matches, allowNewEntry is true, and the input is not empty
+        if (suggestions.length === 0 && this.allowNewEntry && inputStr.trim() !== '') {
+            suggestions.push("New Entry" as unknown as T);
+        }
+        
+        return suggestions;
     }
 
     renderSuggestion(item: T, el: HTMLElement): void {
@@ -205,10 +211,11 @@ export class FuzzySuggester<T> implements ISuggestOwner<T> {
 
     async selectSuggestion(item: T): Promise<void> {
         if (item === "New Entry" as unknown as T) {
-            const newEntryModal = new NewEntryModal(this.app, "Enter new entry");
+            const newEntryModal = new NewEntryModal(this.app, "Enter new entry", this.currentInput);
             const newEntry = await newEntryModal.openAndGetValue();
             if (newEntry) {
                 if (this.indexPath) {
+                    this.indexIntegrator.markAsNewEntry(newEntry); // Mark as new entry
                     await this.indexIntegrator.appendToIndexFile(this.indexPath, newEntry);
                 }
                 this.items.push(newEntry as unknown as T);

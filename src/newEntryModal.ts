@@ -4,7 +4,7 @@ export class NewEntryModal extends Modal {
   private result: string | null = null;
   private resolvePromise: (value: string | null) => void;
 
-  constructor(app: App, private prompt: string) {
+  constructor(app: App, private prompt: string, private defaultValue: string = '') {
     super(app);
   }
 
@@ -16,6 +16,7 @@ export class NewEntryModal extends Modal {
     new Setting(contentEl)
       .setName('New Entry')
       .addText(text => text
+        .setValue(this.defaultValue)
         .onChange(value => {
           this.result = value;
         }));
