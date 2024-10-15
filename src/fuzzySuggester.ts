@@ -103,7 +103,7 @@ export class FuzzySuggester<T> implements ISuggestOwner<T> {
 
     private fuzzySortOptions: Fuzzysort.Options = {
         threshold: -10000,
-        limit: 50,
+        limit: 5,
     };
 
     constructor(
@@ -178,15 +178,23 @@ export class FuzzySuggester<T> implements ISuggestOwner<T> {
     }
 
     getSuggestions(inputStr: string): T[] {
-        this.currentInput = inputStr; // Store the current input
-        const results = Fuzzysort.go(inputStr, this.items, {
-            ...this.fuzzySortOptions,
-            key: this.getItemText,
-        });
-        const suggestions = results.map(result => result.obj as T);
+        this.currentInput = inputStr;
+        let suggestions: T[];
         
-        // Add "New Entry" only if there are no matches, allowNewEntry is true, and the input is not empty
-        if (suggestions.length === 0 && this.allowNewEntry && inputStr.trim() !== '') {
+        if (inputStr.trim() === '') {
+            // If no input, return the first 5 items
+            suggestions = this.items.slice(0, 5);
+        } else {
+            // Otherwise, use fuzzy search
+            const results = Fuzzysort.go(inputStr, this.items, {
+                ...this.fuzzySortOptions,
+                key: this.getItemText,
+            });
+            suggestions = results.map(result => result.obj as T);
+        }
+        
+        // Add "New Entry" only if allowNewEntry is true and it's not already in the suggestions
+        if (this.allowNewEntry && !suggestions.some(item => this.getItemText(item) === "New Entry")) {
             suggestions.push("New Entry" as unknown as T);
         }
         
