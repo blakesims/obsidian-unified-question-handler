@@ -12,6 +12,14 @@
 
 .question-container {
   margin-bottom: 1rem;
+  width: 100%;
+}
+
+.question-container input[type="text"],
+.question-container input[type="number"],
+.question-container select {
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .selected-options {
@@ -45,3 +53,23 @@
 }
 
 /* Add more custom styles as needed */
+
+/* Fuzzy suggester specific styles */
+.suggestion-container {
+  width: 100%;
+  max-height: 200px;
+  overflow-y: auto;
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 4px;
+  background-color: var(--background-primary);
+}
+
+.suggestion-item {
+  padding: 0.5rem;
+  cursor: pointer;
+}
+
+.suggestion-item:hover,
+.suggestion-item.is-selected {
+  background-color: var(--background-secondary);
+}

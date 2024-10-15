@@ -47,6 +47,7 @@ export class QuestionRenderer {
       placeholder: 'Enter your answer'
     });
     input.id = question.answerId;
+    input.style.width = '100%';
     input.addEventListener('input', (e) => {
       onAnswerChange?.(question.answerId, (e.target as HTMLInputElement).value);
     });
@@ -222,6 +223,7 @@ export class QuestionRenderer {
       placeholder: 'Start typing to search...'
     });
     input.id = question.answerId;
+    input.style.width = '100%';
 
     let options: string[] = [];
     if (question.indexPath) {
