@@ -135,7 +135,7 @@ export class FuzzySuggester<T> implements ISuggestOwner<T> {
                 suggestions.push("New Entry" as unknown as T);
             }
             this.suggest.setSuggestions(suggestions);
-            this.open(this.app.dom.appContainerEl, this.inputEl);
+            this.open(document.body, this.inputEl);
         } else {
             this.close();
         }
@@ -184,7 +184,7 @@ export class FuzzySuggester<T> implements ISuggestOwner<T> {
     }
 
     async selectSuggestion(item: T): Promise<void> {
-        if (item === "New Entry") {
+        if (item === "New Entry" as unknown as T) {
             const newEntryModal = new NewEntryModal(this.app, "Enter new entry");
             const newEntry = await newEntryModal.openAndGetValue();
             if (newEntry) {

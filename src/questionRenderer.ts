@@ -28,7 +28,7 @@ export class QuestionRenderer {
         this.renderCheckbox(container, question as CheckboxQuestion, existingAnswer as boolean | undefined, onAnswerChange);
         break;
       case 'multiSelect':
-        await this.renderMultiSelect(container, question as MultiSelectQuestion, existingAnswers: string[] = [], onAnswerChange);
+        await this.renderMultiSelect(container, question as MultiSelectQuestion, existingAnswer as string[] || [], onAnswerChange);
         break;
       case 'fuzzySuggester':
         await this.renderFuzzySuggester(container, question as FuzzySuggesterQuestion, existingAnswer as string | undefined, onAnswerChange);
@@ -119,7 +119,7 @@ export class QuestionRenderer {
 
     if (question.defaultValue && question.indexPath) {
       const indexEntries = await this.indexIntegrator.readIndexFile(question.indexPath);
-      const foundEntry = indexEntries.find(entry => entry.toLowerCase() === question.defaultValue.toLowerCase());
+      const foundEntry = indexEntries.find(entry => entry.toLowerCase() === question.defaultValue?.toLowerCase());
       if (foundEntry) {
         defaultValue = foundEntry;
       }
