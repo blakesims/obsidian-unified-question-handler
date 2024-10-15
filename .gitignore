@@ -7,6 +7,8 @@
 
 # npm
 node_modules
+npm-debug.log
+package-lock.json
 
 # Don't include the compiled main.js file in the repo.
 # They should be uploaded to GitHub releases instead.
@@ -20,4 +22,20 @@ data.json
 
 # Exclude macOS Finder (System Explorer) View States
 .DS_Store
+
+# Exclude examples directory
 examples/
+
+# Exclude build artifacts
+dist/
+
+# Exclude environment files
+.env
+.env.local
+
+# Exclude logs
+*.log
+
+# Exclude temporary files
+*.tmp
+*.temp

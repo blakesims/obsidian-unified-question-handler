@@ -15,22 +15,22 @@ export class QuestionRenderer {
 
     switch (question.type) {
       case 'inputPrompt':
-        this.renderInputPrompt(container, question, existingAnswer as string, onAnswerChange);
+        this.renderInputPrompt(container, question, existingAnswer as string | undefined, onAnswerChange);
         break;
       case 'tpsuggester':
-        await this.renderTpSuggester(container, question, existingAnswer as string, onAnswerChange);
+        await this.renderTpSuggester(container, question as TpSuggesterQuestion, existingAnswer as string | undefined, onAnswerChange);
         break;
       case 'indexedManual':
-        await this.renderIndexedManual(container, question, existingAnswer as string, onAnswerChange);
+        await this.renderIndexedManual(container, question as IndexedManualQuestion, existingAnswer as string | undefined, onAnswerChange);
         break;
       case 'checkbox':
-        this.renderCheckbox(container, question, existingAnswer as boolean, onAnswerChange);
+        this.renderCheckbox(container, question as CheckboxQuestion, existingAnswer as boolean | undefined, onAnswerChange);
         break;
       case 'multiSelect':
-        await this.renderMultiSelect(container, question, existingAnswer as string[], onAnswerChange);
+        await this.renderMultiSelect(container, question as MultiSelectQuestion, existingAnswer as string[] | undefined, onAnswerChange);
         break;
       default:
-        console.error(`Unsupported question type: ${question.type}`);
+        console.error(`Unsupported question type: ${(question as Question).type}`);
     }
 
     return container;
@@ -72,7 +72,7 @@ export class QuestionRenderer {
         question.prompt,
         question.indexPath,
         this.indexIntegrator,
-        question.allowNewEntry
+        question.allowNewEntry ?? false  // Use nullish coalescing operator here
       );
       
       const result = await suggester.openAndGetValue();
@@ -186,7 +186,7 @@ export class QuestionRenderer {
         question.prompt,
         question.indexPath,
         this.indexIntegrator,
-        question.allowNewEntry
+        question.allowNewEntry ?? false  // Use nullish coalescing operator here
       );
 
       const newAnswer = await suggester.openAndGetValue();
