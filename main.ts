@@ -52,7 +52,7 @@ export class UnifiedQuestionHandlerAPI {
     console.log('Asking questions:', questions);
     const modal = new UnifiedQuestionModal(this.app, questions);
     const result = await modal.open();
-    return result || null;
+    return result;
   }
 
   async askDynamicQuestions(
