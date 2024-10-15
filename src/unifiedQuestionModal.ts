@@ -31,17 +31,36 @@ export class UnifiedQuestionModal extends Modal {
 
     const questionsContainer = contentEl.createEl('div', { cls: 'questions-container' });
 
-    this.questions.forEach(async (question) => {
+    this.questions.forEach(async (question, index) => {
       const questionEl = await this.questionRenderer.render(
         question,
         this.answers[question.answerId],
         this.handleAnswerChange.bind(this)
       );
       questionsContainer.appendChild(questionEl);
+
+      // Focus on the first input element
+      if (index === 0) {
+        this.focusOnFirstInput(questionEl);
+      }
     });
 
     const submitButton = contentEl.createEl('button', { text: 'Submit', cls: 'submit-button' });
     submitButton.addEventListener('click', this.handleSubmit.bind(this));
+
+    // Focus on the first input after a short delay
+    setTimeout(() => this.focusOnFirstInput(questionsContainer), 100);
+  }
+
+  private focusOnFirstInput(element: HTMLElement) {
+    const firstInput = element.querySelector('input, textarea, select, .checkbox-wrapper') as HTMLElement;
+    if (firstInput) {
+      if (firstInput.classList.contains('checkbox-wrapper')) {
+        (firstInput.querySelector('input[type="checkbox"]') as HTMLInputElement)?.focus();
+      } else {
+        firstInput.focus();
+      }
+    }
   }
 
   onClose() {

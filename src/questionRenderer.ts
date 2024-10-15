@@ -97,21 +97,38 @@ export class QuestionRenderer {
   }
 
   private renderCheckbox(container: HTMLElement, question: CheckboxQuestion, existingAnswer?: boolean, onAnswerChange?: (answerId: string, value: boolean) => void) {
-    const checkbox = container.createEl('input', { type: 'checkbox' });
+    const wrapper = container.createEl('div', { cls: 'checkbox-wrapper' });
+    
+    const checkbox = wrapper.createEl('input', { type: 'checkbox' });
     checkbox.id = question.answerId;
     checkbox.checked = existingAnswer ?? question.defaultValue ?? false;
     
+    const label = wrapper.createEl('label');
+    label.htmlFor = question.answerId;
+    label.textContent = question.prompt;
+
+    // Make the wrapper focusable
+    wrapper.setAttribute('tabindex', '0');
+
+    // Toggle checkbox on Enter key or Space
+    wrapper.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        checkbox.checked = !checkbox.checked;
+        onAnswerChange?.(question.answerId, checkbox.checked);
+      }
+    });
+
     checkbox.addEventListener('change', (e) => {
       onAnswerChange?.(question.answerId, (e.target as HTMLInputElement).checked);
     });
-
-    const label = container.createEl('label', { text: question.prompt });
-    label.prepend(checkbox);
 
     // If there's an existing answer or default value, trigger the onAnswerChange
     if (existingAnswer !== undefined || question.defaultValue !== undefined) {
       onAnswerChange?.(question.answerId, checkbox.checked);
     }
+
+    return wrapper;
   }
 
   private async renderIndexedManual(container: HTMLElement, question: IndexedManualQuestion, existingAnswer?: string, onAnswerChange?: (answerId: string, value: string) => void) {
