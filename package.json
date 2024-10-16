@@ -1,6 +1,6 @@
 {
   "name": "obsidian-unified-question-handler",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "A plugin that provides a unified interface for handling multiple questions in Obsidian note creation workflows.",
   "main": "main.js",
   "scripts": {
