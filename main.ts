@@ -2,6 +2,7 @@ import { Plugin, App } from 'obsidian';
 import { UnifiedQuestionModal } from './src/unifiedQuestionModal';
 import { Question, Answer } from './src/types';
 import { IndexIntegrator } from './src/indexIntegrator';
+import { UnifiedQuestionHandlerAPI } from './src/api';
 
 export default class UnifiedQuestionHandlerPlugin extends Plugin {
   api: UnifiedQuestionHandlerAPI;
@@ -10,10 +11,12 @@ export default class UnifiedQuestionHandlerPlugin extends Plugin {
     console.log('Loading Unified Question Handler plugin');
 
     this.api = new UnifiedQuestionHandlerAPI(this.app);
-    // Add the API to the global window object for easy access from Templater scripts
-    (window as any).unifiedQuestionHandler = this.api;
+    // Only expose the API through the plugin registry
+    this.app.plugins.plugins['unified-question-handler'] = {
+      api: this.api
+    };
 
-    console.log('Unified Question Handler API attached to window object');
+    console.log('Unified Question Handler API attached to plugin registry');
 
     // Add a command to test the API
     this.addCommand({
@@ -21,7 +24,7 @@ export default class UnifiedQuestionHandlerPlugin extends Plugin {
       name: 'Test Unified Question Handler',
       callback: () => {
         console.log('Running Unified Question Handler test...');
-        (window as any).testUnifiedQuestionHandler();
+        this.testUnifiedQuestionHandler();
       },
     });
 
@@ -30,14 +33,22 @@ export default class UnifiedQuestionHandlerPlugin extends Plugin {
       name: 'Test Create Tutorial Note',
       callback: () => {
         console.log('Running Create Tutorial Note test...');
-        (window as any).createTutorialNote();
+        this.createTutorialNote();
       },
     });
   }
 
   onunload() {
     console.log('Unloading Unified Question Handler plugin');
-    delete (window as any).unifiedQuestionHandler;
+    delete this.app.plugins.plugins['unified-question-handler'];
+  }
+
+  private testUnifiedQuestionHandler() {
+    // Implement test logic here
+  }
+
+  private createTutorialNote() {
+    // Implement tutorial note creation logic here
   }
 }
 
