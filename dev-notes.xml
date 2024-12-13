@@ -367,66 +367,56 @@
           <item>Adapted student-homepage.md template to work with the new system</item>
         </details>
       </task>
+      <task>
+        <description>Refactored plugin to use Obsidian's plugin registry</description>
+        <details>
+          <item>Removed API from global window object</item>
+          <item>Added API to Obsidian's plugin registry in main.ts</item>
+          <item>Updated UnifiedQuestionHandlerPlugin class to expose only the API</item>
+        </details>
+      </task>
+      <task>
+        <description>Implemented utility function for API access</description>
+        <details>
+          <item>Created getUnifiedQuestionHandlerAPI function in utils.ts</item>
+          <item>Added type safety and version checking to the utility function</item>
+        </details>
+      </task>
+      <task>
+        <description>Enhanced UnifiedQuestionHandlerAPI class</description>
+        <details>
+          <item>Added version information to the API</item>
+          <item>Implemented getAPIVersion method</item>
+          <item>Ensured API implements UnifiedQuestionHandlerAPI interface</item>
+        </details>
+      </task>
+      <task>
+        <description>Updated main plugin file</description>
+        <details>
+          <item>Modified onload method to expose only the API through plugin registry</item>
+          <item>Updated onunload method to properly remove the plugin from registry</item>
+        </details>
+      </task>
     </completed-tasks>
     
     <current-state>
       <description>
-        The Unified Question Handler now supports inline fuzzy search dropdowns, improved index file handling, and a more user-friendly interface. It has been successfully integrated with existing scripts and templates.
+        The Unified Question Handler now uses Obsidian's plugin registry for better integration and type safety. The API is accessible through the plugin registry, and a utility function has been implemented for easy access from other plugins or scripts. Version information has been added to the API for future compatibility checks.
       </description>
     </current-state>
     
     <decisions-made>
       <decision>
-        <description>Use a single modal for all questions instead of sequential prompts</description>
-        <rationale>Improves user experience by providing an overview of all questions at once</rationale>
+        <description>Use Obsidian's plugin registry instead of global window object</description>
+        <rationale>Improves integration with Obsidian and follows best practices for plugin development</rationale>
       </decision>
       <decision>
-        <description>Implement QuestionRenderer as a separate class</description>
-        <rationale>Allows for easier extension and maintenance of rendering logic for different question types</rationale>
+        <description>Implement a utility function for API access</description>
+        <rationale>Provides a standardized and type-safe way to access the API from other plugins or scripts</rationale>
       </decision>
       <decision>
-        <description>Use esbuild for bundling the plugin</description>
-        <rationale>Provides fast and efficient bundling, suitable for Obsidian plugin development</rationale>
-      </decision>
-      <decision>
-        <description>Create a custom NewEntryModal for adding new entries</description>
-        <rationale>To replace unsupported window.prompt() and maintain consistency with Obsidian's UI</rationale>
-      </decision>
-      <decision>
-        <description>Simplify the scope to focus on replacing questioning and answer handling in existing scripts</description>
-        <rationale>To create a more focused and easily integrable solution</rationale>
-      </decision>
-      <decision>
-        <description>Implement a flexible question configuration structure</description>
-        <rationale>To support various question types and allow easy integration with existing scripts</rationale>
-      </decision>
-      <decision>
-        <description>Revert complex changes that introduced bugs</description>
-        <rationale>To maintain a stable, working version of the plugin</rationale>
-      </decision>
-      <decision>
-        <description>Postpone implementation of nested indexes</description>
-        <rationale>To focus on core functionality and simplify the current implementation</rationale>
-      </decision>
-      <decision>
-        <description>Defer multiple options functionality</description>
-        <rationale>To be considered for future development after core features are stable</rationale>
-      </decision>
-      <decision>
-        <description>Rename TPSuggester to FuzzySuggester for clarity</description>
-        <rationale>To better reflect the functionality and avoid confusion with Templater plugin naming</rationale>
-      </decision>
-      <decision>
-        <description>Use fuzzysort library for improved fuzzy search capabilities</description>
-        <rationale>To provide a more powerful and flexible fuzzy search experience similar to Obsidian's quick switcher</rationale>
-      </decision>
-      <decision>
-        <description>Implement custom NewEntryModal for adding new entries</description>
-        <rationale>To provide a consistent user experience when adding new entries to indices</rationale>
-      </decision>
-      <decision>
-        <description>Modify index saving logic to only save truly new entries</description>
-        <rationale>To prevent unnecessary writes to index files and maintain data integrity</rationale>
+        <description>Add version information to the API</description>
+        <rationale>Enables version checking for future compatibility and easier updates</rationale>
       </decision>
     </decisions-made>
 
@@ -450,6 +440,16 @@
         <description>Value of incremental improvements and user feedback</description>
         <outcome>Gradually enhanced the plugin's functionality and user experience</outcome>
         <action>Continue to gather user feedback and implement improvements iteratively</action>
+      </lesson>
+      <lesson>
+        <description>Importance of following Obsidian's plugin development best practices</description>
+        <outcome>Improved plugin integration and reduced potential conflicts with other plugins</outcome>
+        <action>Continue to stay updated on Obsidian's plugin development guidelines and best practices</action>
+      </lesson>
+      <lesson>
+        <description>Value of type safety in plugin development</description>
+        <outcome>Reduced potential for runtime errors and improved developer experience</outcome>
+        <action>Consistently use TypeScript features to enhance type safety throughout the plugin</action>
       </lesson>
     </lessons-learned>
   </implementation-progress>
@@ -489,6 +489,30 @@
         <item>Create comprehensive API documentation for the Unified Question Handler</item>
         <item>Develop more example scripts showcasing various use cases</item>
         <item>Write a user guide for migrating existing scripts to use the new API</item>
+      </details>
+    </step>
+    <step>
+      <description>Update documentation to reflect new API access method</description>
+      <priority>High</priority>
+      <details>
+        <item>Update README.md with new examples of how to access and use the API</item>
+        <item>Create or update API documentation to explain the getUnifiedQuestionHandlerAPI utility function</item>
+      </details>
+    </step>
+    <step>
+      <description>Implement comprehensive error handling</description>
+      <priority>Medium</priority>
+      <details>
+        <item>Add try-catch blocks around API calls in the plugin</item>
+        <item>Implement user-friendly error messages for common failure scenarios</item>
+      </details>
+    </step>
+    <step>
+      <description>Create migration guide for existing users</description>
+      <priority>Medium</priority>
+      <details>
+        <item>Document the changes in how the API is accessed</item>
+        <item>Provide step-by-step instructions for updating existing scripts or plugins</item>
       </details>
     </step>
   </next-steps>

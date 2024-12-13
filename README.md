@@ -17,7 +17,7 @@ The Unified Question Handler is an Obsidian plugin that simplifies the process o
 
 ## Usage
 
-The Unified Question Handler exposes an API that you can use in your Templater scripts. Here's a basic example:
+The Unified Question Handler exposes an API that you can use in your scripts or other plugins. Here's a basic example:
 
 ```js
 const api = window.unifiedQuestionHandler;
