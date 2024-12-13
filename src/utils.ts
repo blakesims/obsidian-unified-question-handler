@@ -6,7 +6,7 @@ interface UnifiedQuestionHandlerPlugin {
 }
 
 export function getUnifiedQuestionHandlerAPI(app: App): UnifiedQuestionHandlerAPI {
-  const plugin = app.plugins.plugins['unified-question-handler'] as UnifiedQuestionHandlerPlugin;
+  const plugin = ((app as any).plugins.plugins['unified-question-handler']) as UnifiedQuestionHandlerPlugin;
   if (!plugin || !plugin.api) {
     throw new Error('Unified Question Handler plugin is not installed or enabled');
   }

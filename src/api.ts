@@ -15,8 +15,8 @@ export interface UnifiedQuestionHandlerAPI {
   appendToIndexFile(path: string, entry: string): Promise<boolean>;
 }
 
-export class UnifiedQuestionHandlerAPI implements UnifiedQuestionHandlerAPI {
-  readonly apiVersion = '1.0.0';
+export class UnifiedQuestionHandlerAPIImpl implements UnifiedQuestionHandlerAPI {
+  readonly apiVersion: string = '1.0.0';
   private indexIntegrator: IndexIntegrator;
 
   constructor(private app: App) {
