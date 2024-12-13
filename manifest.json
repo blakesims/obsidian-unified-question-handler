@@ -1,10 +1,12 @@
 {
-	"id": "obsidian-unified-question-handler",
-	"name": "Unified Question Handler",
-	"version": "0.1.5",
-	"minAppVersion": "0.15.0",
-	"description": "A plugin that provides a unified interface for handling multiple questions in Obsidian note creation workflows.",
-	"author": "Your Name",
-	"authorUrl": "https://github.com/yourusername",
-	"isDesktopOnly": false
+  "id": "obsidian-unified-question-handler",
+  "name": "Unified Question Handler",
+  "version": "0.1.5",
+  "minAppVersion": "0.15.0",
+  "description": "A plugin that provides a unified interface for handling multiple questions in Obsidian note creation workflows.",
+  "author": "Blake Sims",
+  "authorUrl": "https://github.com/blakesims/obsidian-unified-question-handler.git",
+  "fundingUrl": "",
+  "isDesktopOnly": false
 }
+
