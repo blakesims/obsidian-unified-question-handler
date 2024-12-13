@@ -38,3 +38,7 @@ dist/
 *.tmp
 *.temp
 for-conversion/
+
+
+# Releasing notes
+RELEASING.md
