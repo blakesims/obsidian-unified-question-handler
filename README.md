@@ -7,7 +7,7 @@ The Unified Question Handler is an Obsidian plugin that simplifies the process o
 - Single modal interface for multiple questions
 - Support for various question types: input, checkbox, fuzzy search, multi-select, and more
 - Integration with index files for dynamic options
-- Easy to integrate with existing Templater scripts
+- Easy to integrate with existing scripts
 
 ## Installation
 
@@ -17,104 +17,91 @@ The Unified Question Handler is an Obsidian plugin that simplifies the process o
 
 ## Usage
 
-The Unified Question Handler exposes an API that you can use in your scripts or other plugins. Here's a basic example:
-
-```js
-const api = window.unifiedQuestionHandler;
-const questions = [
-{
-type: "inputPrompt",
-prompt: "What's your name?",
-answerId: "name"
-},
-{
-type: "checkbox",
-prompt: "Are you a student?",
-answerId: "isStudent"
-}
-];
-const answers = await api.askQuestions(questions);
-if (answers) {
-console.log(Name: ${answers.name});
-console.log(Is student: ${answers.isStudent ? 'Yes' : 'No'});
-}
-```
-
-## Comparison with Traditional Templater Scripts
-
-Traditional Templater script:
+The Unified Question Handler exposes an API through Obsidian's plugin registry. Here's how to access and use it:
 
 ```javascript
-let name = await tp.system.prompt("What's your name?");
-let isStudent = await tp.system.prompt("Are you a student?", "yes/no");
-console.log(Name: ${name});
-console.log(Is student: ${isStudent === 'yes' ? 'Yes' : 'No'});
+// Get the API from the plugin registry
+const api = app.plugins.plugins['unified-question-handler'].api;
 
-```
-
-
-Unified Question Handler approach:
-
-```javascript
-const api = window.unifiedQuestionHandler;
+// Example usage
 const questions = [
-{
-type: "inputPrompt",
-prompt: "What's your name?",
-answerId: "name"
-},
-{
-type: "checkbox",
-prompt: "Are you a student?",
-answerId: "isStudent"
-}
+    {
+        type: "inputPrompt",
+        prompt: "What's your name?",
+        answerId: "name"
+    },
+    {
+        type: "checkbox",
+        prompt: "Are you a student?",
+        answerId: "isStudent"
+    }
 ];
+
 const answers = await api.askQuestions(questions);
 if (answers) {
-console.log(Name: ${answers.name});
-console.log(Is student: ${answers.isStudent ? 'Yes' : 'No'});
+    console.log(`Name: ${answers.name}`);
+    console.log(`Is student: ${answers.isStudent ? 'Yes' : 'No'}`);
 }
-
 ```
 
-The main differences are:
-1. All questions are presented in a single modal, improving user experience.
-2. Question types are more diverse and can be easily extended.
-3. Answers are returned as a single object, making it easier to handle multiple inputs.
+### Type-Safe API Access
+
+For better type safety and version checking, you can use the provided utility function:
+
+```javascript
+const { getUnifiedQuestionHandlerAPI } = require('unified-question-handler/utils');
+
+try {
+    const api = getUnifiedQuestionHandlerAPI(app);
+    // Use the API as shown above
+} catch (error) {
+    console.error('Failed to access Unified Question Handler:', error);
+}
+```
+
+## Question Types
+
+The plugin supports various question types:
+
+1. `inputPrompt`: Simple text input
+2. `checkbox`: Yes/no questions
+3. `fuzzySuggester`: Selection with fuzzy search
+4. `multiSelect`: Multiple option selection
+5. `indexedManual`: Selection from an index file with manual entry option
 
 ## Using Index Files
 
-Index files allow you to maintain lists of options for your questions. For example:
+Index files allow you to maintain lists of options for your questions:
 
-
-```js
+```javascript
 const questions = [
-{
-type: "fuzzySuggester",
-prompt: "Select your favorite color:",
-answerId: "favoriteColor",
-indexPath: "Meta/Indices/Colors.md"
-}
+    {
+        type: "fuzzySuggester",
+        prompt: "Select your favorite color:",
+        answerId: "favoriteColor",
+        indexPath: "Meta/Indices/Colors.md",
+        allowNewEntry: true
+    }
 ];
-
 ```
 
-In this example, `Colors.md` would contain a list of color options:
-
+The index file (`Colors.md`) should contain a list of options:
 ```
 Red
 Blue
 Green
 Yellow
 Purple
-
 ```
 
-The Unified Question Handler will read this file and present these options to the user with fuzzy search capabilities.
+## API Version Information
 
-## More Examples
+The plugin includes version information to ensure compatibility:
 
-Check out the `examples` directory in this repository for more detailed usage examples.
+```javascript
+const api = getUnifiedQuestionHandlerAPI(app);
+console.log(`API Version: ${api.getAPIVersion()}`);
+```
 
 ## Contributing
 
