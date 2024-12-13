@@ -2,6 +2,7 @@ import { App } from 'obsidian';
 import { Question, Answer } from './types';
 import { IndexIntegrator } from './indexIntegrator';
 import { UnifiedQuestionModal } from './unifiedQuestionModal';
+import type UnifiedQuestionHandlerPlugin from '../main';
 
 export interface UnifiedQuestionHandlerAPI {
   readonly apiVersion: string;
@@ -18,6 +19,7 @@ export interface UnifiedQuestionHandlerAPI {
 export class UnifiedQuestionHandlerAPIImpl implements UnifiedQuestionHandlerAPI {
   readonly apiVersion: string = '1.0.0';
   private indexIntegrator: IndexIntegrator;
+  plugin: UnifiedQuestionHandlerPlugin;
 
   constructor(private app: App) {
     this.indexIntegrator = new IndexIntegrator(app);

@@ -1,4 +1,4 @@
-import { Plugin, App } from 'obsidian';
+import { Plugin } from 'obsidian';
 import { UnifiedQuestionModal } from './src/unifiedQuestionModal';
 import { Question, Answer } from './src/types';
 import { IndexIntegrator } from './src/indexIntegrator';
@@ -11,12 +11,12 @@ export default class UnifiedQuestionHandlerPlugin extends Plugin {
     console.log('Loading Unified Question Handler plugin');
 
     this.api = new UnifiedQuestionHandlerAPIImpl(this.app);
-    // Only expose the API through the plugin registry
-    (this.app as any).plugins.plugins['unified-question-handler'] = {
-      api: this.api
-    };
+    
+    // Expose both the plugin instance and the API
+    (this.app as any).plugins.plugins['obsidian-unified-question-handler'] = this;
+    this.api.plugin = this;
 
-    console.log('Unified Question Handler API attached to plugin registry');
+    console.log('Unified Question Handler plugin loaded');
 
     // Add a command to test the API
     this.addCommand({
@@ -40,7 +40,12 @@ export default class UnifiedQuestionHandlerPlugin extends Plugin {
 
   onunload() {
     console.log('Unloading Unified Question Handler plugin');
-    delete (this.app as any).plugins.plugins['unified-question-handler'];
+    delete (this.app as any).plugins.plugins['obsidian-unified-question-handler'];
+  }
+
+  // Expose the API for other plugins to use
+  getAPI(): UnifiedQuestionHandlerAPIImpl {
+    return this.api;
   }
 
   private testUnifiedQuestionHandler() {
